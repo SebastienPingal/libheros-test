@@ -1,14 +1,20 @@
 import { defineStore } from 'pinia'
+import { useTodoListStore } from './todoList'
 
 const api = useApi()
 export const useUserStore = defineStore('user', () => {
+  const todoListStore = useTodoListStore()
+  const { todoLists } = storeToRefs(todoListStore)
+
   const token = ref('')
   const user = ref<IUser | null>(null)
 
   watch(token, async (newToken) => {
     if (newToken) {
       const response = await api.auth.me()
-      user.value = response.data.value
+      const { todoLists: fetchedTodoLists, ...fetchedUser } = response.data.value
+      user.value = fetchedUser
+      todoLists.value = fetchedTodoLists
     }
     else {
       user.value = null

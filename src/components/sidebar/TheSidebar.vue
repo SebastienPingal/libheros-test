@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
 
-type Section = 'assets' | 'enfant'
+const userStore = useUserStore()
+const todoListStore = useTodoListStore()
+
+const { user } = storeToRefs(userStore)
+const { todoLists } = storeToRefs(todoListStore)
 
 // Responsive
 const isSidebarOpen = defineModel<boolean>()
@@ -18,56 +22,41 @@ function closeSidebarOnMobile() {
 
 // Sections related
 const route = useRoute()
-const activeSection = ref<Section | null>(null)
-
-function getSectionFromPath(path: string): Section | undefined {
-  return ['assets', 'enfant'].find(
-    section => path.includes(`/${section}`),
-  ) as Section | undefined
-}
-
-function toggleSection(section: Section) {
-  activeSection.value = activeSection.value === section ? null : section
-}
-
-// Development mode check
-const isDevelopmentMode = ref(import.meta.env.VITE_MODE === 'development')
 
 watch(() => route.path, () => {
   closeSidebarOnMobile()
 })
 
-onMounted(() => {
-  // Open the correct section when the page is loaded
-  const section = getSectionFromPath(route.path)
-
-  if (section) toggleSection(section)
-})
+const items = computed(() => [
+  ...todoLists.value.map(list => ({
+    label: list.title,
+    icon: 'i-ci-list-check',
+    route: `/todo-lists/${list.id}`,
+  })),
+  {
+    icon: 'i-ci-add-plus',
+    label: 'Create Todo List',
+    route: '/test',
+  },
+])
 </script>
 
 <template>
-  <div v-show="isSidebarOpen" class="sticky top-0 flex h-screen min-w-[260px] flex-col">
-    <div class="flex flex-col gap-4 overflow-y-auto p-4">
-
-      <!-- NAVIGATION -->
-      <nav class="mb-4 flex flex-col gap-2">
-
-        <!-- OVERVIEW -->
-        <TheSidebarButton
-          icon="i-ci-house-01"
-          label="Overview"
-          route="/"
-        />
-
-        <!-- LOGIN -->
-        <TheSidebarButton
-          icon="i-ci-house-01"
-          label="Login"
-          route="/login"
-        />
-
-      </nav>
-    </div>
-
-  </div>
+  <Menu :model="items">
+    <template v-if="user" #start>
+      <button v-ripple class="relative flex w-full flex-col items-start gap-1 overflow-hidden rounded-none border-0 bg-transparent p-2 pl-4 transition-colors duration-200">
+        <span>{{ user.name }}</span>
+        <span class="text-sm">{{ user.email }}</span>
+      </button>
+    </template>
+    <template #item="{ item }">
+      <router-link
+        class="flex gap-2"
+        :to="item.route"
+      >
+        <span :class="item.icon" />
+        <span>{{ item.label }}</span>
+      </router-link>
+    </template>
+  </Menu>
 </template>
