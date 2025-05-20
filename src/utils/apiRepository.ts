@@ -20,7 +20,7 @@ export function useApiFetch<T = unknown>(
   // Add token to headers if it exists
   const baseHeaders = {
     'Content-Type': 'application/json',
-    ...(token ? { 'x-auth-token': token } : {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
   }
 
   const finalOptions = { ...options, headers: { ...baseHeaders, ...options?.headers } }

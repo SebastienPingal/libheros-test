@@ -28,8 +28,9 @@ async function handleRegister() {
   const { name, email, password, confirmPassword } = registerForm.value
   if (!name || !email || !password || !confirmPassword) return
   if (password !== confirmPassword) return
-
-  const response = await api.auth.register(registerForm.value, toast)
+  
+  const { confirmPassword: _, ...data } = registerForm.value
+  const response = await api.auth.register(data, toast)
   token.value = response.data.value.token
 }
 
@@ -41,6 +42,20 @@ async function handleGetMe() {
 
 <template>
   <div class="flex flex-col items-center justify-center gap-8">
+    <Card>
+      <template #content>
+        <h2 class="text-xl font-bold">👤 User Profile</h2>
+        <p v-if="token">
+          <span class="font-semibold">Token provided</span>
+        </p>
+        <p v-if="user">
+          <span class="font-semibold">Name:</span> {{ user.name }}
+          <span class="font-semibold">Email:</span> {{ user.email }}
+        </p>
+        <Button severity="secondary" @click="handleGetMe">🔄 Refresh Profile</Button>
+      </template>
+    </Card>
+
     <Card>
       <template #content>
         <Tabs value="0">
