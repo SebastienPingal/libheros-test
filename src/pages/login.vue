@@ -1,4 +1,6 @@
 <script setup>
+import CryptoJS from 'crypto-js'
+
 const toast = useToast()
 
 const userStore = useUserStore()
@@ -19,8 +21,11 @@ const registerForm = ref({
 const api = useApi()
 
 async function handleLogin() {
-  const response = await api.auth.login(loginForm.value)
-
+  const hashedPassword = CryptoJS.SHA256(loginForm.value.password).toString()
+  const response = await api.auth.login({
+    ...loginForm.value,
+    password: hashedPassword,
+  })
   token.value = response.data.value.token
 }
 
@@ -28,9 +33,13 @@ async function handleRegister() {
   const { name, email, password, confirmPassword } = registerForm.value
   if (!name || !email || !password || !confirmPassword) return
   if (password !== confirmPassword) return
-  
+
+  const hashedPassword = CryptoJS.SHA256(password).toString()
   const { confirmPassword: _, ...data } = registerForm.value
-  const response = await api.auth.register(data, toast)
+  const response = await api.auth.register(
+    { ...data, password: hashedPassword },
+    toast,
+  )
   token.value = response.data.value.token
 }
 
