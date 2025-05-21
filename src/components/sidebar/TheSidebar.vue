@@ -31,7 +31,7 @@ const items = computed(() => [
   ...todoLists.value.map((list: ITodoList) => ({
     label: list.title,
     icon: 'i-ci-list-check',
-    route: `/todo-lists/${list.id}`,
+    route: `/todo-list/${list.id}`,
   })),
 ])
 </script>

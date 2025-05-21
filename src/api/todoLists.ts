@@ -12,26 +12,6 @@ export function todoListsApiRepository() {
     }
   }
 
-  function getAll(userId: string) {
-    return useApiFetch<ITodoList[]>(
-      `/todo-lists/${userId}`,
-      {
-        method: 'GET',
-      },
-      {
-        success: {
-          summary: 'Todo lists fetched successfully',
-          detail: 'Todo lists fetched successfully',
-        },
-        error: {
-          summary: 'Todo lists fetch failed',
-          detail: 'Todo lists fetch failed',
-        },
-      },
-      toast,
-    ).json()
-  }
-
   function create(title: string) {
     return useApiFetch<ITodoList>(
       `/todo-lists`,
@@ -91,7 +71,6 @@ export function todoListsApiRepository() {
   }
 
   return {
-    getAll,
     create,
     update,
     remove,
