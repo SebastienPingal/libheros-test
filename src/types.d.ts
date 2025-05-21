@@ -20,6 +20,7 @@ declare global {
     title: string
     description: string
     completed: boolean
+    expirationDate: Date
     createdAt: Date
     updatedAt: Date
   }

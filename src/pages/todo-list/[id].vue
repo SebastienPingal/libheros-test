@@ -1,23 +1,10 @@
 <script setup lang="ts">
 import TodoSidebar from '@/components/sidebar/TodoSidebar.vue'
 
-const route = useRoute()
-const api = useApi()
-
 const todoListsStore = useTodoListsStore()
-const { todoLists } = storeToRefs(todoListsStore)
+const { selectedTodoList, selectedTodo } = storeToRefs(todoListsStore)
+const { updateTodo } = todoListsStore
 
-const selectedTodoListId = computed(() => (route.params as { id: string }).id)
-const selectedTodoId = ref<string | null>(null)
-
-const selectedTodoList = computed(() => todoLists.value.find(list => list.id === selectedTodoListId.value))
-const selectedTodo = computed(() => {
-  if (!selectedTodoList.value) return null
-
-  return selectedTodoList.value.todos.find(todo => todo.id === selectedTodoId.value)
-})
-
-// Sort todos by creation date (oldest first, most recent last)
 const displayedTodos = computed(() => {
   if (!selectedTodoList.value) return []
 
@@ -38,42 +25,12 @@ const hiddenTodos = computed(() => {
     })
 })
 
-// Menu state
-const isMenuOpen = ref(false)
+const isNewTodoDialogOpen = ref(false)
+const isSidebarOpen = ref(false)
 
-// Open menu when selectedTodoId changes from null to non-null
-watch(selectedTodoId, (newValue) => {
-  if (newValue !== null) {
-    isMenuOpen.value = true
-  }
+watch(selectedTodo, () => {
+  isSidebarOpen.value = !!selectedTodo.value
 })
-
-async function createTodo() {
-  if (!selectedTodoList.value) return
-
-  const response = await api.todo.create(selectedTodoList.value.id, 'Nouvelle tâche', 'Vous pouvez modifier la description de la tâche et le titre en cliquant sur le champ correspondant')
-  if (response.data.value) {
-    selectedTodoList?.value?.todos.push(response.data.value)
-    selectedTodoId.value = response.data.value.id
-  }
-}
-
-async function updateTodo(todo: ITodo, data: Partial<ITodo>) {
-  if (!selectedTodoList.value) return
-
-  try {
-    const response = await api.todo.update(todo.id, data)
-    if (!response.data.value) return
-
-    const todoIndex = selectedTodoList.value.todos.findIndex(t => t.id === todo.id)
-    if (todoIndex !== -1) {
-      selectedTodoList.value.todos[todoIndex] = response.data.value
-    }
-  }
-  catch (error) {
-    console.error('❌ Error updating todo:', error)
-  }
-}
 </script>
 
 <template>
@@ -88,26 +45,31 @@ async function updateTodo(todo: ITodo, data: Partial<ITodo>) {
             v-for="todo in displayedTodos"
             :key="todo.id"
             :todo
-            @click="selectedTodoId = todo.id"
-            @update:completed="updateTodo(todo, { completed: $event })"
+            @click="selectedTodo = todo"
+            @update:completed="updateTodo(todo.id, { completed: $event })"
           />
 
           <Button
             class="flex items-center justify-center gap-2 rounded-md"
-            @click="createTodo"
+            @click="isNewTodoDialogOpen = true"
           >
             <span class="i-ci-plus" />
             Nouvelle tâche
           </Button>
 
-          <Panel collapsed header="Tâches complétées" toggleable>
+          <Panel
+            v-if="hiddenTodos.length > 0"
+            collapsed
+            header="Tâches complétées"
+            toggleable
+          >
             <div class="flex flex-col gap-2">
               <TodoItem
                 v-for="todo in hiddenTodos"
                 :key="todo.id"
                 :todo
-                @click="selectedTodoId = todo.id"
-                @update:completed="updateTodo(todo, { completed: $event })"
+                @click="selectedTodo = todo"
+                @update:completed="updateTodo(todo.id, { completed: $event })"
               />
             </div>
           </Panel>
@@ -117,10 +79,15 @@ async function updateTodo(todo: ITodo, data: Partial<ITodo>) {
 
     <TodoSidebar
       v-if="selectedTodo"
-      :is-open="isMenuOpen"
-      :todo="selectedTodo"
-      @close="isMenuOpen = false"
-      @save-changes="updateTodo(selectedTodo, $event)"
+      :is-open="isSidebarOpen"
+      @close="isSidebarOpen = false"
+    />
+
+    <NewTodoDialog
+      v-if="selectedTodoList"
+      v-model:visible="isNewTodoDialogOpen"
+      :selected-todo-list-id="selectedTodoList.id"
+      @close="isNewTodoDialogOpen = false"
     />
   </div>
 </template>
