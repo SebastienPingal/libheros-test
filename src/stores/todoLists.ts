@@ -21,6 +21,7 @@ export const useTodoListsStore = defineStore('todoLists', () => {
       const todoIndex = selectedTodoList.value.todos.findIndex(t => t.id === todoId)
       if (todoIndex !== -1) {
         selectedTodoList.value.todos[todoIndex] = response.data.value
+        selectedTodo.value = null
       }
 
       return response.data.value
@@ -38,5 +39,16 @@ export const useTodoListsStore = defineStore('todoLists', () => {
     }
   }
 
-  return { todoLists, selectedTodo, selectedTodoList, updateTodo, createTodo }
+  async function deleteTodo() {
+    if (!selectedTodo.value || !selectedTodoList.value) return
+
+    const todoId = selectedTodo.value.id
+    const response = await api.todo.remove(todoId)
+    if (response.data.value) {
+      selectedTodoList.value.todos = selectedTodoList.value.todos.filter(todo => todo.id !== todoId)
+      selectedTodo.value = null
+    }
+  }
+
+  return { todoLists, selectedTodo, selectedTodoList, updateTodo, createTodo, deleteTodo }
 })
