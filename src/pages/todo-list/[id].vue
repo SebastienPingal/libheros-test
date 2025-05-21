@@ -78,7 +78,6 @@ watch(selectedTodo, () => {
     </Card>
 
     <TodoSidebar
-      v-if="selectedTodo"
       :is-open="isSidebarOpen"
       @close="isSidebarOpen = false"
     />
