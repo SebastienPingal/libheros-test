@@ -34,7 +34,7 @@ function getToastClasses(severity: ISeverity) {
 </script>
 
 <template>
-  <Toast>
+  <Toast position="bottom-right">
     <template #message="slotProps">
       <div class="flex flex-1 gap-3">
         <!-- icon -->
