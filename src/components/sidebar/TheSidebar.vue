@@ -1,37 +1,22 @@
 <script setup lang="ts">
-import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
+import type { MenuItem } from 'primevue/menuitem'
 
 const userStore = useUserStore()
 const todoListsStore = useTodoListsStore()
 
 const { user } = storeToRefs(userStore)
 const { todoLists } = storeToRefs(todoListsStore)
+const { deleteTodoList } = todoListsStore
 
-// Responsive
-const isSidebarOpen = defineModel<boolean>()
-const breakpoints = useBreakpoints(breakpointsTailwind)
-watch(breakpoints.md, (value: boolean) => {
-  isSidebarOpen.value = value
-}, { immediate: true })
-
-function closeSidebarOnMobile() {
-  if (breakpoints.md.value) return
-
-  isSidebarOpen.value = false
-}
-
-// Sections related
-const route = useRoute()
-
-watch(() => route.path, () => {
-  closeSidebarOnMobile()
-})
+const isDeleteDialogVisible = ref(false)
+const itemToDelete = ref<MenuItem | null>(null)
 
 const items = computed(() => [
   ...todoLists.value.map((list: ITodoList) => ({
     label: list.title,
     icon: 'i-ci-list-check',
     route: `/todo-list/${list.id}`,
+    id: list.id,
   })),
 ])
 </script>
@@ -48,18 +33,35 @@ const items = computed(() => [
       </button>
     </template>
     <template #item="{ item }">
-      <router-link
-        class="m-0 flex w-full items-center gap-2 rounded-none p-0"
-        :to="item.route"
-      >
-        <span :class="item.icon" />
-        <span>{{ item.label }}</span>
-      </router-link>
+      <div class="flex w-full items-center justify-between">
+        <router-link
+          class="m-0 flex h-10 w-full items-center gap-2 rounded-none"
+          :to="item.route"
+        >
+          <span :class="item.icon" />
+          <span>{{ item.label }}</span>
+        </router-link>
+        <Button
+          aria-label="Supprimer la liste"
+          icon="i-ci-trash-empty"
+          rounded
+          severity="danger"
+          text
+          @click="isDeleteDialogVisible = true; itemToDelete = item"
+        />
+      </div>
     </template>
     <template #end>
       <NewListButton class="w-full" />
     </template>
   </menu>
+  <DeleteDialog
+    v-model:is-visible="isDeleteDialogVisible"
+    :message="`Voulez-vous vraiment supprimer la liste ${itemToDelete?.label} ? Cela supprimera toutes les tâches associées.`"
+    :title="`Supprimer la liste ${itemToDelete?.label}`"
+    @cancel="isDeleteDialogVisible = false"
+    @delete="deleteTodoList(itemToDelete?.id)"
+  />
 </template>
 
 <style scoped>

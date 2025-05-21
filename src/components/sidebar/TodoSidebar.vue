@@ -6,8 +6,8 @@ defineProps<{
 }>()
 
 const todoListsStore = useTodoListsStore()
-const { selectedTodo, selectedTodoList } = storeToRefs(todoListsStore)
-const { updateTodo } = todoListsStore
+const { selectedTodo } = storeToRefs(todoListsStore)
+const { updateTodo, deleteTodo } = todoListsStore
 
 const originalTitle = computed(() => selectedTodo.value?.title)
 const originalDescription = computed(() => selectedTodo.value?.description)
@@ -33,6 +33,8 @@ function selectAllText(event: FocusEvent) {
   target.select()
 }
 
+const isDeleteDialogVisible = ref(false)
+
 const formatedDate = computed(() => useDateFormatter(selectedTodo.value?.createdAt))
 
 watch(selectedTodo, () => {
@@ -50,8 +52,6 @@ async function saveTodoChanges() {
     description: newDescription.value,
     expirationDate: newExpirationDate.value,
   })
-
-  selectedTodo.value = null
 }
 </script>
 
@@ -115,6 +115,23 @@ async function saveTodoChanges() {
       icon="i-ci-save"
       label="Sauvegarder"
       @click="saveTodoChanges"
+    />
+
+    <Button
+      v-if="selectedTodo"
+      class="w-full"
+      icon="i-ci-trash"
+      label="Supprimer"
+      severity="danger"
+      @click="isDeleteDialogVisible = true"
+    />
+
+    <DeleteDialog
+      v-model:is-visible="isDeleteDialogVisible"
+      :message="`Voulez-vous vraiment supprimer la tâche ${originalTitle} ?`"
+      :title="`Supprimer la tâche ${originalTitle}`"
+      @cancel="isDeleteDialogVisible = false"
+      @delete="deleteTodo"
     />
   </div>
 </template>
