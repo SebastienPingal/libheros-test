@@ -100,7 +100,12 @@ async function updateTodo(todo: ITodo, data: Partial<ITodo>) {
             Nouvelle tâche
           </Button>
 
-          <Panel collapsed header="Tâches complétées" toggleable>
+          <Panel
+            v-if="hiddenTodos.length > 0"
+            collapsed
+            header="Tâches complétées"
+            toggleable
+          >
             <div class="flex flex-col gap-2">
               <TodoItem
                 v-for="todo in hiddenTodos"
