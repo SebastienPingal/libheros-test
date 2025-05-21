@@ -11,19 +11,38 @@ const todoListsStore = useTodoListsStore()
 const { todoLists } = storeToRefs(todoListsStore)
 
 const selectedTodoList = computed(() => todoLists.value.find(list => list.id === selectedTodoListId.value))
-const selectedTodo = computed(() => selectedTodoList.value?.todos.find(todo => todo.id === selectedTodoId.value))
+const selectedTodo = computed(() => {
+  if (!selectedTodoList.value) return null
+
+  return selectedTodoList.value.todos.find(todo => todo.id === selectedTodoId.value)
+})
+
+// Sort todos by creation date (oldest first, most recent last)
+const sortedTodos = computed(() => {
+  if (!selectedTodoList.value) return []
+
+  return [...selectedTodoList.value.todos].sort((a, b) => {
+    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+  })
+})
 
 // Menu state
 const isMenuOpen = ref(false)
 
+// Open menu when selectedTodoId changes from null to non-null
+watch(selectedTodoId, (newValue) => {
+  if (newValue !== null) {
+    isMenuOpen.value = true
+  }
+})
+
 async function createTodo() {
   if (!selectedTodoList.value) return
 
-  const response = await api.todo.create(selectedTodoList.value.id, 'Nouvelle tâche', 'Description de la tâche')
+  const response = await api.todo.create(selectedTodoList.value.id, 'Nouvelle tâche', 'Vous pouvez modifier la description de la tâche et le titre en cliquant sur le champ correspondant')
   if (response.data.value) {
     selectedTodoList?.value?.todos.push(response.data.value)
     selectedTodoId.value = response.data.value.id
-    isMenuOpen.value = true
   }
 }
 
@@ -32,16 +51,17 @@ async function updateTodo(todo: ITodo, data: Partial<ITodo>) {
 
   try {
     const response = await api.todo.update(todo.id, data)
-    if (response.data.value) {
-      todo.completed = response.data.value.completed
+    if (!response.data.value) return
+
+    const todoIndex = selectedTodoList.value.todos.findIndex(t => t.id === todo.id)
+    if (todoIndex !== -1) {
+      selectedTodoList.value.todos[todoIndex] = response.data.value
     }
   }
   catch (error) {
     console.error('❌ Error updating todo:', error)
   }
 }
-
-const completed = ref(false)
 </script>
 
 <template>
@@ -53,16 +73,13 @@ const completed = ref(false)
       <template #content>
         <div class="flex flex-col gap-2">
           <TodoItem
-            v-for="todo in selectedTodoList?.todos"
+            v-for="todo in sortedTodos"
             :key="todo.id"
             :todo
             @click="selectedTodoId = todo.id"
             @update:completed="updateTodo(todo, { completed: $event })"
           />
-          <Checkbox
-            v-model="completed"
-            binary
-          />
+
           <Button
             class="flex items-center justify-center gap-2 rounded-md"
             @click="createTodo"
@@ -79,6 +96,7 @@ const completed = ref(false)
       :is-open="isMenuOpen"
       :todo="selectedTodo"
       @close="isMenuOpen = false"
+      @save-changes="updateTodo(selectedTodo, $event)"
     />
   </div>
 </template>
