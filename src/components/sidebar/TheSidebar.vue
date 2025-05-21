@@ -38,25 +38,22 @@ const items = computed(() => [
 
 <template>
   <Menu
-    class="rounded-none shadow-lg"
+    class="m-0 rounded-none p-0 shadow-lg"
     :model="items"
   >
     <template #start>
-      <button v-if="user" v-ripple class="relative flex w-full flex-col items-start gap-1 overflow-hidden rounded-none border-0 bg-transparent p-2 pl-4 transition-colors duration-200">
-        <span>{{ user.name }}</span>
-        <span class="text-sm">{{ user.email }}</span>
+      <button v-ripple class="relative flex w-full flex-col items-start gap-1 overflow-hidden rounded-none border-0 bg-transparent p-2 pl-4 transition-colors duration-200">
+        <span>{{ user?.name }}</span>
+        <span class="text-sm">{{ user?.email }}</span>
       </button>
     </template>
     <template #item="{ item }">
       <router-link
-        class="flex w-full items-center gap-2"
+        class="m-0 flex w-full items-center gap-2 rounded-none p-0"
         :to="item.route"
       >
-        <Button
-          class="w-full"
-          :icon="item.icon"
-          :label="typeof item.label === 'function' ? item.label() : (item.label || '')"
-        />
+        <span :class="item.icon" />
+        <span>{{ item.label }}</span>
       </router-link>
     </template>
     <template #end>
@@ -64,3 +61,9 @@ const items = computed(() => [
     </template>
   </menu>
 </template>
+
+<style scoped>
+:deep(.p-menu-list) {
+  @apply m-0 rounded-none bg-red-100 p-0 dark:bg-surface-900;
+}
+</style>

@@ -1,7 +1,13 @@
 <script setup lang="ts">
 const todoListsStore = useTodoListsStore()
 const { todoLists } = storeToRefs(todoListsStore)
+const userStore = useUserStore()
+const { user } = storeToRefs(userStore)
+const api = useApi()
 
+const toast = useToast()
+
+const active = ref(false)
 const newListTitle = ref('')
 
 const canSaveNewTodoList = computed(() => {
@@ -11,23 +17,30 @@ const canSaveNewTodoList = computed(() => {
   return title.length > 0 && !todoLists.value.some((list: ITodoList) => list.title.toLowerCase() === title.toLowerCase())
 })
 
-function createTodoList() {
+async function createTodoList() {
   if (!canSaveNewTodoList.value) return
+  if (!user.value?.id) return
 
-  todoListsStore.createTodoList(newListTitle.value)
-  newListTitle.value = ''
+  const response = await api.todoLists.create(newListTitle.value)
+  if (response.data.value) {
+    todoLists.value.push(response.data.value)
+    newListTitle.value = ''
+    active.value = false
+  }
 }
 </script>
 
 <template>
   <div class="w-full">
-    <Inplace class="w-full">
+    <Inplace
+      v-model:active="active"
+      class="w-full"
+    >
       <template #display>
-        <Button
-          class="w-full rounded-none"
-          @click="createTodoList"
-        >
-          <span class="text-sm">nouvelle liste</span>
+        <Button class="w-full rounded-none">
+          <span class="text-sm">
+            nouvelle liste
+          </span>
           <Icon name="i-ci-plus" />
         </Button>
       </template>

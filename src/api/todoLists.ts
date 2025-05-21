@@ -32,12 +32,12 @@ export function todoListsApiRepository() {
     ).json()
   }
 
-  function create(title: string, userId: string) {
+  function create(title: string) {
     return useApiFetch<ITodoList>(
-      `/todo-lists/${userId}`,
+      `/todo-lists`,
       {
         method: 'POST',
-        body: JSON.stringify(title),
+        body: JSON.stringify({ title }),
       },
       {
         success: {

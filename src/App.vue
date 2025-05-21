@@ -2,6 +2,8 @@
 import { useHead } from '@unhead/vue'
 
 const route = useRoute()
+const userStore = useUserStore()
+const { user } = storeToRefs(userStore)
 
 const pageWithNavigation = computed(() =>
   route.name && !['/maintenance', '/[...404]'].includes(route.name),
@@ -34,7 +36,7 @@ useHead({
   <div class="flex bg-surface-50 dark:bg-surface-950">
     <ConfirmDialog dismissable-mask />
 
-    <TheSidebar v-if="pageWithNavigation" v-model="isSidebarOpen" class="w-64" />
+    <TheSidebar v-if="user && pageWithNavigation" v-model="isSidebarOpen" class="w-64" />
     <div class="flex grow flex-col overflow-hidden">
       <BaseToast />
       <RouterView
