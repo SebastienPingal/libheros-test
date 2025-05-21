@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { useTodoListsStore } from './todoLists'
+import { router } from '~/router'
 
 const api = useApi()
 export const useUserStore = defineStore('user', () => {
@@ -15,11 +16,18 @@ export const useUserStore = defineStore('user', () => {
       const { todoLists: fetchedTodoLists, ...fetchedUser } = response.data.value
       user.value = fetchedUser
       todoLists.value = fetchedTodoLists
+      router.push('/')
     }
     else {
       user.value = null
     }
   })
 
-  return { token, user }
+  function logout() {
+    token.value = ''
+    user.value = null
+    router.push('/login')
+  }
+
+  return { token, user, logout }
 }, { persist: true })

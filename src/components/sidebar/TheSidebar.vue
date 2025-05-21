@@ -27,10 +27,19 @@ const items = computed(() => [
     :model="items"
   >
     <template #start>
-      <button v-ripple class="relative flex w-full flex-col items-start gap-1 overflow-hidden rounded-none border-0 bg-transparent p-2 pl-4 transition-colors duration-200">
-        <span>{{ user?.name }}</span>
-        <span class="text-sm">{{ user?.email }}</span>
-      </button>
+      <div class="flex w-full items-center justify-between">
+        <button v-ripple class="relative flex w-full flex-col items-start gap-1 overflow-hidden rounded-none border-0 bg-transparent p-2 pl-4 transition-colors duration-200">
+          <span>{{ user?.name }}</span>
+          <span class="text-sm">{{ user?.email }}</span>
+        </button>
+        <Button
+          icon="i-ci-log-out"
+          rounded
+          severity="danger"
+          text
+          @click="userStore.logout"
+        />
+      </div>
     </template>
     <template #item="{ item }">
       <div class="flex w-full items-center justify-between">
