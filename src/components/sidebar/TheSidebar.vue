@@ -23,7 +23,7 @@ const items = computed(() => [
 
 <template>
   <Menu
-    class="m-0 rounded-none p-0 shadow-lg"
+    class="m-0 w-64 rounded-none p-0 shadow-lg"
     :model="items"
   >
     <template #start>

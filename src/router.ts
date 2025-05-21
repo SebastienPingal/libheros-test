@@ -37,7 +37,7 @@ router.beforeEach((to, from, next) => {
 
   if (!isPublic && !isAuthenticated) {
     // 🚷 Redirect to login if not authenticated
-    next({ name: '/login' })
+    next({ path: '/login' })
   }
   else {
     next()

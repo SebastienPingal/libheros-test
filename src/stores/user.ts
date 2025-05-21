@@ -16,7 +16,10 @@ export const useUserStore = defineStore('user', () => {
       const { todoLists: fetchedTodoLists, ...fetchedUser } = response.data.value
       user.value = fetchedUser
       todoLists.value = fetchedTodoLists
-      router.push('/')
+      // Don't always push to home - only if coming from login
+      if (router.currentRoute.value.path === '/login') {
+        router.push('/')
+      }
     }
     else {
       user.value = null
