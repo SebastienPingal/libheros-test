@@ -5,8 +5,6 @@ const userStore = useUserStore()
 const { user } = storeToRefs(userStore)
 const api = useApi()
 
-const toast = useToast()
-
 const active = ref(false)
 const newListTitle = ref('')
 
