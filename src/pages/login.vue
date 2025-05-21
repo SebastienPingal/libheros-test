@@ -51,19 +51,6 @@ async function handleGetMe() {
 
 <template>
   <div class="flex flex-col items-center justify-center gap-8">
-    <Card>
-      <template #content>
-        <h2 class="text-xl font-bold">👤 User Profile</h2>
-        <p v-if="token">
-          <span class="font-semibold">Token provided</span>
-        </p>
-        <p v-if="user">
-          <span class="font-semibold">Name:</span> {{ user.name }}
-          <span class="font-semibold">Email:</span> {{ user.email }}
-        </p>
-        <Button severity="secondary" @click="handleGetMe">🔄 Refresh Profile</Button>
-      </template>
-    </Card>
 
     <Card>
       <template #content>

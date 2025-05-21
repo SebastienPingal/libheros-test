@@ -1,6 +1,6 @@
 import type { ToastServiceMethods } from 'primevue'
 
-export function todoListApiRepository() {
+export function todoListsApiRepository() {
   let toast: ToastServiceMethods | undefined
   try {
     toast = useToast()
@@ -12,9 +12,9 @@ export function todoListApiRepository() {
     }
   }
 
-  function getTodoLists() {
+  function getAll(userId: string) {
     return useApiFetch<ITodoList[]>(
-      '/todo-lists',
+      `/todo-lists/${userId}`,
       {
         method: 'GET',
       },
@@ -32,28 +32,28 @@ export function todoListApiRepository() {
     ).json()
   }
 
-  function createTodoList(todoList: ITodoList) {
+  function create(title: string, userId: string) {
     return useApiFetch<ITodoList>(
-      '/todo-lists',
+      `/todo-lists/${userId}`,
       {
         method: 'POST',
-        body: JSON.stringify(todoList),
+        body: JSON.stringify(title),
       },
       {
         success: {
-          summary: 'Todo list created successfully',
-          detail: 'Todo list created successfully',
+          summary: '📝 Todo list created successfully',
+          detail: 'Your new todo list has been created',
         },
         error: {
-          summary: 'Todo list creation failed',
-          detail: 'Todo list creation failed',
+          summary: '❌ Todo list creation failed',
+          detail: 'Unable to create todo list. Please try again.',
         },
       },
       toast,
     ).json()
   }
 
-  function updateTodoList(todoList: ITodoList) {
+  function update(todoList: ITodoList) {
     return useApiFetch<ITodoList>(
       `/todo-lists/${todoList.id}`,
       {
@@ -74,7 +74,7 @@ export function todoListApiRepository() {
     ).json()
   }
 
-  function deleteTodoList(id: string) {
+  function remove(id: string) {
     return useApiFetch<void>(
       `/todo-lists/${id}`,
       {
@@ -91,9 +91,9 @@ export function todoListApiRepository() {
   }
 
   return {
-    getTodoLists,
-    createTodoList,
-    updateTodoList,
-    deleteTodoList,
+    getAll,
+    create,
+    update,
+    remove,
   }
 }

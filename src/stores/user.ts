@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia'
-import { useTodoListStore } from './todoList'
+import { useTodoListsStore } from './todoLists'
 
 const api = useApi()
 export const useUserStore = defineStore('user', () => {
-  const todoListStore = useTodoListStore()
-  const { todoLists } = storeToRefs(todoListStore)
+  const todoListsStore = useTodoListsStore()
+  const { todoLists } = storeToRefs(todoListsStore)
 
   const token = ref('')
   const user = ref<IUser | null>(null)
