@@ -2,29 +2,29 @@
 import TodoSidebar from '@/components/sidebar/TodoSidebar.vue'
 
 const route = useRoute()
-const id = computed(() => (route.params as { id: string }).id)
+const api = useApi()
+
+const selectedTodoListId = computed(() => (route.params as { id: string }).id)
+const selectedTodoId = ref<string | null>(null)
 
 const todoListsStore = useTodoListsStore()
 const { todoLists } = storeToRefs(todoListsStore)
 
-const selectedTodoList = computed(() => todoLists.value.find(list => list.id === id.value))
-const selectedTodo = ref<ITodo | null>(null)
-const newTodo = ref<Partial<ITodo>>({
-  title: 'Nouvelle tâche',
-  description: 'Description de la tâche',
-  completed: false,
-})
+const selectedTodoList = computed(() => todoLists.value.find(list => list.id === selectedTodoListId.value))
+const selectedTodo = computed(() => selectedTodoList.value?.todos.find(todo => todo.id === selectedTodoId.value))
 
 // Menu state
 const isMenuOpen = ref(false)
 
-function toggleMenu() {
-  isMenuOpen.value = !isMenuOpen.value
-}
+async function createTodo() {
+  if (!selectedTodoList.value) return
 
-function saveTodo() {
-  // TODO: Implement save functionality
-  isMenuOpen.value = false
+  const response = await api.todo.create(selectedTodoList.value.id, 'Nouvelle tâche', 'Description de la tâche')
+  if (response.data.value) {
+    selectedTodoList?.value?.todos.push(response.data.value)
+    selectedTodoId.value = response.data.value.id
+    isMenuOpen.value = true
+  }
 }
 </script>
 
@@ -41,7 +41,7 @@ function saveTodo() {
           </div>
           <button
             class="flex items-center justify-center gap-2 rounded-md bg-blue-500 p-2 text-white"
-            @click="toggleMenu"
+            @click="createTodo"
           >
             <span class="i-ci-plus" />
             Nouvelle tâche
@@ -51,12 +51,10 @@ function saveTodo() {
     </Card>
 
     <TodoSidebar
+      v-if="selectedTodo"
       :is-open="isMenuOpen"
-      :todo="newTodo"
-      :todo-list-title="selectedTodoList?.title"
+      :todo="selectedTodo"
       @close="isMenuOpen = false"
-      @save="saveTodo"
-      @update:todo="newTodo = $event"
     />
   </div>
 </template>

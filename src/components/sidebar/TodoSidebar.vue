@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import type { ITodo } from '@/api/types'
-
 const props = defineProps<{
   isOpen: boolean
   todo: Partial<ITodo>
