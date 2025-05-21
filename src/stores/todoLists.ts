@@ -50,5 +50,15 @@ export const useTodoListsStore = defineStore('todoLists', () => {
     }
   }
 
-  return { todoLists, selectedTodo, selectedTodoList, updateTodo, createTodo, deleteTodo }
+  async function deleteTodoList(listId: string) {
+    console.log('deleteTodoList', listId)
+    if (!listId) return
+
+    const response = await api.todoLists.remove(listId)
+    if (response.data.value) {
+      todoLists.value = todoLists.value.filter(list => list.id !== listId)
+    }
+  }
+
+  return { todoLists, selectedTodo, selectedTodoList, updateTodo, createTodo, deleteTodo, deleteTodoList }
 })

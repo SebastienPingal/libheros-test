@@ -13,6 +13,12 @@ const isVisible = defineModel<boolean>('isVisible')
 
 function handleDelete() {
   emit('delete')
+  isVisible.value = false
+}
+
+function handleCancel() {
+  emit('cancel')
+  isVisible.value = false
 }
 </script>
 
@@ -25,7 +31,7 @@ function handleDelete() {
   >
     <p>{{ message }}</p>
     <template #footer>
-      <Button label="Annuler" severity="secondary" @click="emit('cancel')" />
+      <Button label="Annuler" severity="secondary" @click="handleCancel" />
       <Button label="Supprimer" severity="danger" @click="handleDelete" />
     </template>
   </Dialog>
