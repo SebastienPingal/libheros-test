@@ -26,6 +26,22 @@ async function createTodo() {
     isMenuOpen.value = true
   }
 }
+
+async function updateTodo(todo: ITodo, data: Partial<ITodo>) {
+  if (!selectedTodoList.value) return
+
+  try {
+    const response = await api.todo.update(todo.id, data)
+    if (response.data.value) {
+      todo.completed = response.data.value.completed
+    }
+  }
+  catch (error) {
+    console.error('❌ Error updating todo:', error)
+  }
+}
+
+const completed = ref(false)
 </script>
 
 <template>
@@ -36,16 +52,24 @@ async function createTodo() {
       </template>
       <template #content>
         <div class="flex flex-col gap-2">
-          <div v-for="todo in selectedTodoList?.todos" :key="todo.id" class="flex items-center gap-2">
-            {{ todo.title }}
-          </div>
-          <button
-            class="flex items-center justify-center gap-2 rounded-md bg-blue-500 p-2 text-white"
+          <TodoItem
+            v-for="todo in selectedTodoList?.todos"
+            :key="todo.id"
+            :todo
+            @click="selectedTodoId = todo.id"
+            @update:completed="updateTodo(todo, { completed: $event })"
+          />
+          <Checkbox
+            v-model="completed"
+            binary
+          />
+          <Button
+            class="flex items-center justify-center gap-2 rounded-md"
             @click="createTodo"
           >
             <span class="i-ci-plus" />
             Nouvelle tâche
-          </button>
+          </Button>
         </div>
       </template>
     </Card>

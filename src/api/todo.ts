@@ -33,12 +33,12 @@ export function todoApiRepository() {
     ).json()
   }
 
-  function update(todo: ITodo) {
+  function update(todoId: string, data: Partial<ITodo>) {
     return useApiFetch<ITodo>(
-      `/todos/${todo.id}`,
+      `/todos/${todoId}`,
       {
         method: 'PUT',
-        body: JSON.stringify(todo),
+        body: JSON.stringify(data),
       },
       {
         success: {
