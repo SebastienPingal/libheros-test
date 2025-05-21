@@ -7,7 +7,8 @@ function frenchOrdinal(n: number) {
  * 1er janvier 2025
  * 2 février 2025
  */
-export default function useDateFormatter(date: Date) {
+export default function useDateFormatter(date: Date | string | undefined) {
+  if (!date) return ''
   const options: Intl.DateTimeFormatOptions = {
     weekday: 'long',
     day: 'numeric',

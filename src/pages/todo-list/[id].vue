@@ -1,21 +1,9 @@
 <script setup lang="ts">
 import TodoSidebar from '@/components/sidebar/TodoSidebar.vue'
 
-const route = useRoute()
-const api = useApi()
-
 const todoListsStore = useTodoListsStore()
-const { todoLists } = storeToRefs(todoListsStore)
-
-const selectedTodoListId = computed(() => (route.params as { id: string }).id)
-const selectedTodoId = ref<string | null>(null)
-
-const selectedTodoList = computed(() => todoLists.value.find(list => list.id === selectedTodoListId.value))
-const selectedTodo = computed(() => {
-  if (!selectedTodoList.value) return null
-
-  return selectedTodoList.value.todos.find(todo => todo.id === selectedTodoId.value)
-})
+const { selectedTodoList, selectedTodo } = storeToRefs(todoListsStore)
+const { updateTodo } = todoListsStore
 
 const displayedTodos = computed(() => {
   if (!selectedTodoList.value) return []
@@ -37,25 +25,12 @@ const hiddenTodos = computed(() => {
     })
 })
 
-const isMenuOpen = ref(false)
 const isNewTodoDialogOpen = ref(false)
+const isSidebarOpen = ref(false)
 
-async function updateTodo(todo: ITodo, data: Partial<ITodo>) {
-  if (!selectedTodoList.value) return
-
-  try {
-    const response = await api.todo.update(todo.id, data)
-    if (!response.data.value) return
-
-    const todoIndex = selectedTodoList.value.todos.findIndex(t => t.id === todo.id)
-    if (todoIndex !== -1) {
-      selectedTodoList.value.todos[todoIndex] = response.data.value
-    }
-  }
-  catch (error) {
-    console.error('❌ Error updating todo:', error)
-  }
-}
+watch(selectedTodo, () => {
+  isSidebarOpen.value = !!selectedTodo.value
+})
 </script>
 
 <template>
@@ -70,8 +45,8 @@ async function updateTodo(todo: ITodo, data: Partial<ITodo>) {
             v-for="todo in displayedTodos"
             :key="todo.id"
             :todo
-            @click="selectedTodoId = todo.id"
-            @update:completed="updateTodo(todo, { completed: $event })"
+            @click="selectedTodo = todo"
+            @update:completed="updateTodo(todo.id, { completed: $event })"
           />
 
           <Button
@@ -93,8 +68,8 @@ async function updateTodo(todo: ITodo, data: Partial<ITodo>) {
                 v-for="todo in hiddenTodos"
                 :key="todo.id"
                 :todo
-                @click="selectedTodoId = todo.id"
-                @update:completed="updateTodo(todo, { completed: $event })"
+                @click="selectedTodo = todo"
+                @update:completed="updateTodo(todo.id, { completed: $event })"
               />
             </div>
           </Panel>
@@ -104,10 +79,8 @@ async function updateTodo(todo: ITodo, data: Partial<ITodo>) {
 
     <TodoSidebar
       v-if="selectedTodo"
-      :is-open="isMenuOpen"
-      :todo="selectedTodo"
-      @close="isMenuOpen = false"
-      @save-changes="updateTodo(selectedTodo, $event)"
+      :is-open="isSidebarOpen"
+      @close="isSidebarOpen = false"
     />
 
     <NewTodoDialog
