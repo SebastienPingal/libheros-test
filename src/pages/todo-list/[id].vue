@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import TodoSidebar from '@/components/sidebar/TodoSidebar.vue'
+
 const route = useRoute()
 const id = computed(() => (route.params as { id: string }).id)
 
@@ -6,12 +8,23 @@ const todoListsStore = useTodoListsStore()
 const { todoLists } = storeToRefs(todoListsStore)
 
 const selectedTodoList = computed(() => todoLists.value.find(list => list.id === id.value))
+const selectedTodo = ref<ITodo | null>(null)
+const newTodo = ref<Partial<ITodo>>({
+  title: 'Nouvelle tâche',
+  description: 'Description de la tâche',
+  completed: false,
+})
 
 // Menu state
 const isMenuOpen = ref(false)
 
 function toggleMenu() {
   isMenuOpen.value = !isMenuOpen.value
+}
+
+function saveTodo() {
+  // TODO: Implement save functionality
+  isMenuOpen.value = false
 }
 </script>
 
@@ -37,30 +50,13 @@ function toggleMenu() {
       </template>
     </Card>
 
-    <div
-      class="fixed right-0 top-0 h-full w-80 bg-white shadow-lg transition-transform duration-300 ease-in-out"
-      :class="isMenuOpen ? 'translate-x-0' : 'translate-x-full'"
-    >
-      <div class="border-b p-4">
-        <div class="flex items-center justify-between">
-          <h2 class="text-xl font-bold">Détails de la liste</h2>
-          <button class="p-2" @click="toggleMenu">
-            <span class="i-ci-close text-lg" />
-          </button>
-        </div>
-      </div>
-
-      <div class="flex flex-col gap-4 p-4">
-        <div class="flex flex-col gap-2">
-          <label class="font-medium">Titre</label>
-        </div>
-        <div class="flex flex-col gap-2">
-          <label class="font-medium">Description</label>
-        </div>
-        <div class="flex justify-end">
-          <Button icon="i-ci-save" label="Sauvegarder" />
-        </div>
-      </div>
-    </div>
+    <TodoSidebar
+      :is-open="isMenuOpen"
+      :todo="newTodo"
+      :todo-list-title="selectedTodoList?.title"
+      @close="isMenuOpen = false"
+      @save="saveTodo"
+      @update:todo="newTodo = $event"
+    />
   </div>
 </template>
