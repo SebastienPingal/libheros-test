@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { router } from '~/router'
 
 export const useTodoListsStore = defineStore('todoLists', () => {
   const todoLists = ref<ITodoList[]>([])
@@ -57,6 +58,9 @@ export const useTodoListsStore = defineStore('todoLists', () => {
     const response = await api.todoLists.remove(listId)
     if (response.data.value) {
       todoLists.value = todoLists.value.filter(list => list.id !== listId)
+      if (route.path === `/todo-list/${listId}`) {
+        router.push('/')
+      }
     }
   }
 
