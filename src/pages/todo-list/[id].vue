@@ -17,7 +17,6 @@ const selectedTodo = computed(() => {
   return selectedTodoList.value.todos.find(todo => todo.id === selectedTodoId.value)
 })
 
-// Sort todos by creation date (oldest first, most recent last)
 const displayedTodos = computed(() => {
   if (!selectedTodoList.value) return []
 
@@ -38,25 +37,8 @@ const hiddenTodos = computed(() => {
     })
 })
 
-// Menu state
 const isMenuOpen = ref(false)
-
-// Open menu when selectedTodoId changes from null to non-null
-watch(selectedTodoId, (newValue) => {
-  if (newValue !== null) {
-    isMenuOpen.value = true
-  }
-})
-
-async function createTodo() {
-  if (!selectedTodoList.value) return
-
-  const response = await api.todo.create(selectedTodoList.value.id, 'Nouvelle tâche', 'Vous pouvez modifier la description de la tâche et le titre en cliquant sur le champ correspondant')
-  if (response.data.value) {
-    selectedTodoList?.value?.todos.push(response.data.value)
-    selectedTodoId.value = response.data.value.id
-  }
-}
+const isNewTodoDialogOpen = ref(false)
 
 async function updateTodo(todo: ITodo, data: Partial<ITodo>) {
   if (!selectedTodoList.value) return
@@ -94,7 +76,7 @@ async function updateTodo(todo: ITodo, data: Partial<ITodo>) {
 
           <Button
             class="flex items-center justify-center gap-2 rounded-md"
-            @click="createTodo"
+            @click="isNewTodoDialogOpen = true"
           >
             <span class="i-ci-plus" />
             Nouvelle tâche
@@ -126,6 +108,13 @@ async function updateTodo(todo: ITodo, data: Partial<ITodo>) {
       :todo="selectedTodo"
       @close="isMenuOpen = false"
       @save-changes="updateTodo(selectedTodo, $event)"
+    />
+
+    <NewTodoDialog
+      v-if="selectedTodoList"
+      v-model:visible="isNewTodoDialogOpen"
+      :selected-todo-list-id="selectedTodoList.id"
+      @close="isNewTodoDialogOpen = false"
     />
   </div>
 </template>

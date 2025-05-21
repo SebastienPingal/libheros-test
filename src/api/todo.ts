@@ -12,12 +12,12 @@ export function todoApiRepository() {
     }
   }
 
-  function create(todoListId: string, title: string, description: string) {
+  function create(todoListId: string, title: string, description: string, expirationDate: Date) {
     return useApiFetch<ITodo>(
       `/todos/todo-list/${todoListId}`,
       {
         method: 'POST',
-        body: JSON.stringify({ title, description }),
+        body: JSON.stringify({ title, description, expirationDate }),
       },
       {
         success: {
